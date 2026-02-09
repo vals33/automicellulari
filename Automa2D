@@ -1,0 +1,102 @@
+class Automa2D {
+    private int[][] griglia; // Griglia 2D di celle 
+    private int larghezza;
+    private int altezza;
+
+    // Costruttore: inizializza griglia vuota
+    public Automa2D(int larghezza, int altezza) {
+        this.larghezza = larghezza;
+        this.altezza = altezza;
+        this.griglia = new int[altezza][larghezza];
+    }
+
+    // Metodo per impostare un pattern iniziale 
+    public void impostaPattern(int[][] pattern, int offsetX, int offsetY) {
+        for (int i = 0; i < pattern.length; i++) {
+            for (int j = 0; j < pattern[0].length; j++) {
+                if (i + offsetY < altezza && j + offsetX < larghezza) {
+                    griglia[i + offsetY][j + offsetX] = pattern[i][j];
+                }
+            }
+        }
+    }
+
+    // Conta i vicini vivi per una cella 
+    private int contaVicini(int x, int y) {
+        int count = 0;
+        for (int i = -1; i <= 1; i++) {
+            for (int j = -1; j <= 1; j++) {
+                if (i == 0 && j == 0) continue; // Salta se stessa
+                int nx = x + j;
+                int ny = y + i;
+                if (nx >= 0 && nx < larghezza && ny >= 0 && ny < altezza) {
+                    count += griglia[ny][nx];
+                }
+            }
+        }
+        return count;
+    }
+
+    // Metodo per avanzare allo stato successivo 
+    public void nextStato() {
+        int[][] nuovaGriglia = new int[altezza][larghezza];
+
+        for (int y = 0; y < altezza; y++) {
+            for (int x = 0; x < larghezza; x++) {
+                int vicini = contaVicini(x, y);
+                if (griglia[y][x] == 1) { // Cella viva
+                    if (vicini < 2 || vicini > 3) {
+                        nuovaGriglia[y][x] = 0; // Muore per isolamento o sovrappopolazione
+                    } else {
+                        nuovaGriglia[y][x] = 1; // Sopravvive
+                    }
+                } else { // Cella morta
+                    if (vicini == 3) {
+                        nuovaGriglia[y][x] = 1; // Nasce per riproduzione
+                    } else {
+                        nuovaGriglia[y][x] = 0;
+                    }
+                }
+            }
+        }
+
+        griglia = nuovaGriglia; // Aggiorna la griglia
+    }
+
+    // Metodo per stampare la griglia (usa █ per viva, spazio per morta)
+    public void stampa() {
+        for (int y = 0; y < altezza; y++) {
+            for (int x = 0; x < larghezza; x++) {
+                System.out.print(griglia[y][x] == 1 ? "█" : " ");
+            }
+            System.out.println();
+        }
+        System.out.println(); // Spazio tra generazioni
+    }
+}
+class Main {
+    public static void main(String[] args) {
+    
+        Automa2D game = new Automa2D(20, 20); // Griglia 20x20
+    
+        
+        int[][] glider = {
+            {0, 1, 0},
+            {0, 0, 1},
+            {1, 1, 1}
+        };
+        game.impostaPattern(glider, 1, 1); 
+    
+    
+        for (int i = 0; i < 30; i++) { // 30 generazioni
+            game.stampa();
+            game.nextStato();
+        }
+    }
+    
+}
+
+
+    
+
+
